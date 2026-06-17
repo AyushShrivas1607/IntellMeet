@@ -5,6 +5,10 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const {
   createMeeting,
+  joinMeeting,
+  getMeetings,
+  getMeetingById,
+  leaveMeeting,
 } = require("../controllers/meetingController");
 
 router.post(
@@ -13,4 +17,27 @@ router.post(
   createMeeting
 );
 
+router.post(
+  "/join",
+  authMiddleware,
+  joinMeeting
+);
 module.exports = router;
+
+router.get(
+  "/all",
+  authMiddleware,
+  getMeetings
+);
+
+router.get(
+  "/:id",
+  authMiddleware,
+  getMeetingById
+);
+
+router.post(
+  "/leave",
+  authMiddleware,
+  leaveMeeting
+);

@@ -1,8 +1,12 @@
 require("dotenv").config();
 
+
 const express = require("express");
+const http = require("http");
+const { initSocket } = require("./socket");
 
 const app = express();
+const server = http.createServer(app);
 app.use(express.json());
 
 app.use("/api/auth", require("./routes/authRoutes"));
@@ -18,6 +22,8 @@ app.get("/", (req, res) => {
   res.send("IntellMeet Backend Running");
 });
 
-app.listen(5000, () => {
+initSocket(server);
+
+server.listen(5000, () => {
   console.log("Server running on port 5000");
 });
