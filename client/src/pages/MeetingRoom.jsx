@@ -3,27 +3,34 @@ import { io } from "socket.io-client";
 
 const socket = io("http://localhost:5000");
 
-function SocketTest() {
+function MeetingRoom() {
+  const roomId = "6HZN0J";
+
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [participants, setParticipants] = useState(0);
 
   useEffect(() => {
-    socket.emit("joinRoom", "meeting123");
+  socket.emit("joinRoom", roomId);
 
-    socket.on("receiveMessage", (data) => {
-      setMessages((prev) => [...prev, data.message]);
-    });
+  socket.on("receiveMessage", (data) => {
+    setMessages((prev) => [...prev, data.message]);
+  });
 
-    return () => {
-      socket.off("receiveMessage");
-    };
-  }, []);
+  socket.on("participantsUpdate", (count) => {
+    setParticipants(count);
+  });
+
+  return () => {
+    socket.off("receiveMessage");
+  };
+}, []);
 
   const sendMessage = () => {
     if (!message.trim()) return;
 
     socket.emit("sendMessage", {
-      roomId: "meeting123",
+      roomId,
       message,
     });
 
@@ -32,13 +39,15 @@ function SocketTest() {
 
   return (
     <div>
-      <h2>Meeting Chat</h2>
+      <h1>Meeting Room</h1>
+
+      <h3>Meeting Code: {roomId}</h3>
+      <h3>Participants Online: {participants}</h3>
 
       <input
-        type="text"
-        placeholder="Type message..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type message..."
       />
 
       <button onClick={sendMessage}>
@@ -54,4 +63,4 @@ function SocketTest() {
   );
 }
 
-export default SocketTest;
+export default MeetingRoom;

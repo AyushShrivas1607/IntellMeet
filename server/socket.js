@@ -1,5 +1,7 @@
 const socketio = require("socket.io");
 
+const roomUsers = {};
+
 let io;
 
 const initSocket = (server) => {
@@ -15,6 +17,19 @@ const initSocket = (server) => {
     socket.on("joinRoom", (roomId) => {
       socket.join(roomId);
 
+      if (!roomUsers[roomId]) {
+        roomUsers[roomId] = [];
+      }
+
+      if (!roomUsers[roomId].includes(socket.id)) {
+  roomUsers[roomId].push(socket.id);
+}
+
+      io.to(roomId).emit(
+        "participantsUpdate",
+        roomUsers[roomId].length
+      );
+
       console.log(
         `User ${socket.id} joined room ${roomId}`
       );
@@ -28,14 +43,20 @@ const initSocket = (server) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(
-        "User Disconnected:",
-        socket.id
-      );
+      Object.keys(roomUsers).forEach((roomId) => {
+        roomUsers[roomId] = roomUsers[roomId].filter(
+          (id) => id !== socket.id
+        );
+
+        io.to(roomId).emit(
+          "participantsUpdate",
+          roomUsers[roomId].length
+        );
+      });
+
+      console.log("User Disconnected:", socket.id);
     });
   });
 };
 
-module.exports = {
-  initSocket,
-};
+module.exports = { initSocket };

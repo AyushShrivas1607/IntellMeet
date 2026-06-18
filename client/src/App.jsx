@@ -1,10 +1,9 @@
-import SocketTest from "./components/SocketTest";
+import MeetingRoom from "./pages/MeetingRoom";
 
 function App() {
   return (
     <div>
-      <h1>IntellMeet</h1>
-      <SocketTest />
+      <MeetingRoom />
     </div>
   );
 }
