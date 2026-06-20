@@ -1,4 +1,5 @@
 const socketio = require("socket.io");
+const Message = require("./models/Message");
 
 const roomUsers = {};
 
@@ -39,12 +40,25 @@ const initSocket = (server) => {
       });
     });
 
-    socket.on("sendMessage", (data) => {
-      io.to(data.roomId).emit(
-        "receiveMessage",
-        data
-      );
+   socket.on("sendMessage", async (data) => {
+  try {
+    const newMessage = await Message.create({
+      roomId: data.roomId,
+      sender: data.sender || "Anonymous",
+      message: data.message,
     });
+
+    io.to(data.roomId).emit(
+      "receiveMessage",
+      newMessage
+    );
+  } catch (error) {
+    console.error(
+      "Message Save Error:",
+      error
+    );
+  }
+});
 
     socket.on("disconnect", () => {
       Object.keys(roomUsers).forEach((roomId) => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import axios from "axios";
 
 const socket = io("http://localhost:5000");
 
@@ -14,8 +15,24 @@ function MeetingRoom() {
   useEffect(() => {
     socket.emit("joinRoom", roomId);
 
+    const loadMessages = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/messages/${roomId}`
+        );
+
+        console.log("Loaded Messages:", res.data);
+
+        setMessages(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadMessages();
+
     const handleMessage = (data) => {
-      setMessages((prev) => [...prev, data.message]);
+      setMessages((prev) => [...prev, data]);
     };
 
     const handleParticipants = (count) => {
@@ -45,11 +62,14 @@ function MeetingRoom() {
 
     socket.emit("sendMessage", {
       roomId,
+      sender: "Abc",
       message,
     });
 
     setMessage("");
   };
+  console.log("Current messages state:", messages);
+  console.log("First message:", messages[0]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -86,13 +106,21 @@ function MeetingRoom() {
 
       <hr />
 
-      <h3>Chat Messages</h3>
+    <h3>Chat Messages</h3>
 
-      <ul>
-        {messages.map((msg, index) => (
-          <li key={index}>{msg}</li>
-        ))}
-      </ul>
+<p>Total Messages: {messages.length}</p>
+
+{messages.length === 0 ? (
+  <p>No messages found</p>
+) : (
+  <ul>
+    {messages.map((msg) => (
+      <li key={msg._id}>
+        <strong>{msg.sender}</strong>: {msg.message}
+      </li>
+    ))}
+  </ul>
+)}
     </div>
   );
 }
