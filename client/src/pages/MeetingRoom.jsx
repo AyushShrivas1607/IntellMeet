@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import Peer from "simple-peer";
 import { io } from "socket.io-client";
+import Peer from "simple-peer";
 import axios from "axios";
 
 const socket = io("http://localhost:5000", {
@@ -10,37 +10,59 @@ const socket = io("http://localhost:5000", {
 
 function MeetingRoom() {
   const { meetingCode } = useParams();
+
   const roomId = meetingCode;
 
-  // ================= CHAT =================
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [participants, setParticipants] = useState([]);
 
-  // ================= VIDEO =================
-  const myVideo = useRef(null);
-  const [stream, setStream] = useState(null);
-  const [peers, setPeers] = useState([]);
-  const peersRef = useRef([]);
-
-  // ================= CONTROLS =================
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
 
-  // ================= JOIN ROOM =================
+  const myVideo = useRef();
+  const peersRef = useRef([]);
+
+  const [stream, setStream] = useState(null);
+  const [peers, setPeers] = useState([]);
+
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({
+        video: true,
+        audio: true,
+      })
+      .then((currentStream) => {
+        setStream(currentStream);
+
+        if (myVideo.current) {
+          myVideo.current.srcObject = currentStream;
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   useEffect(() => {
     if (!roomId) return;
 
     socket.emit("joinRoom", {
       roomId,
       user: {
-        id: localStorage.getItem("userId"),
-        name: localStorage.getItem("userName") || "Anonymous",
+        id:
+          localStorage.getItem("userId") ||
+          `demo-${Math.random()
+            .toString(36)
+            .slice(2, 9)}`,
+        name:
+          localStorage.getItem("userName") ||
+          "Ayush",
       },
     });
 
     axios
-      .get(`http://localhost:5000/api/messages/${roomId}`)
+      .get(
+        `http://localhost:5000/api/messages/${roomId}`
+      )
       .then((res) => setMessages(res.data))
       .catch(console.error);
 
@@ -58,21 +80,6 @@ function MeetingRoom() {
     };
   }, [roomId]);
 
-  // ================= CAMERA =================
-  useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((currentStream) => {
-        setStream(currentStream);
-
-        if (myVideo.current) {
-          myVideo.current.srcObject = currentStream;
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  // ================= WEBRTC =================
   useEffect(() => {
     if (!stream) return;
 
@@ -80,39 +87,70 @@ function MeetingRoom() {
       const peersArray = [];
 
       users.forEach((userId) => {
-        const peer = createPeer(userId, stream);
+        const peer = createPeer(
+          userId,
+          stream
+        );
 
-        peersRef.current.push({ peerID: userId, peer });
+        peersRef.current.push({
+          peerID: userId,
+          peer,
+        });
+
         peersArray.push(peer);
       });
 
       setPeers(peersArray);
     });
 
-    socket.on("user-joined", ({ signal, callerId }) => {
-      const peer = addPeer(signal, callerId, stream);
+    socket.on(
+      "user-joined",
+      ({ signal, callerId }) => {
+        const peer = addPeer(
+          signal,
+          callerId,
+          stream
+        );
 
-      peersRef.current.push({ peerID: callerId, peer });
-      setPeers((prev) => [...prev, peer]);
-    });
+        peersRef.current.push({
+          peerID: callerId,
+          peer,
+        });
 
-    socket.on("receivingReturnedSignal", ({ signal, id }) => {
-      const item = peersRef.current.find((p) => p.peerID === id);
-      if (item) item.peer.signal(signal);
-    });
+        setPeers((prev) => [
+          ...prev,
+          peer,
+        ]);
+      }
+    );
+
+    socket.on(
+      "receivingReturnedSignal",
+      ({ signal, id }) => {
+        const item =
+          peersRef.current.find(
+            (p) => p.peerID === id
+          );
+
+        if (item) {
+          item.peer.signal(signal);
+        }
+      }
+    );
 
     return () => {
       socket.off("all-users");
       socket.off("user-joined");
-      socket.off("receivingReturnedSignal");
-
-      peersRef.current = [];
-      setPeers([]);
+      socket.off(
+        "receivingReturnedSignal"
+      );
     };
   }, [stream]);
 
-  // ================= PEER HELPERS =================
-  const createPeer = (userToSignal, stream) => {
+  const createPeer = (
+    userToSignal,
+    stream
+  ) => {
     const peer = new Peer({
       initiator: true,
       trickle: false,
@@ -120,13 +158,20 @@ function MeetingRoom() {
     });
 
     peer.on("signal", (signal) => {
-      socket.emit("sendingSignal", { userToSignal, signal });
+      socket.emit("sendingSignal", {
+        userToSignal,
+        signal,
+      });
     });
 
     return peer;
   };
 
-  const addPeer = (incomingSignal, callerId, stream) => {
+  const addPeer = (
+    incomingSignal,
+    callerId,
+    stream
+  ) => {
     const peer = new Peer({
       initiator: false,
       trickle: false,
@@ -134,69 +179,109 @@ function MeetingRoom() {
     });
 
     peer.on("signal", (signal) => {
-      socket.emit("returningSignal", { signal, callerId });
+      socket.emit("returningSignal", {
+        signal,
+        callerId,
+      });
     });
 
     peer.signal(incomingSignal);
 
     return peer;
   };
-
-  // ================= CHAT =================
   const sendMessage = () => {
     if (!message.trim()) return;
 
     socket.emit("sendMessage", {
       roomId,
-      sender: localStorage.getItem("userName") || "Anonymous",
+      sender:
+        localStorage.getItem("userName") ||
+        "Anonymous",
       message,
     });
 
     setMessage("");
   };
 
-  // ================= CONTROLS =================
   const toggleAudio = () => {
-    stream.getAudioTracks().forEach((t) => {
-      t.enabled = !t.enabled;
-    });
-    setAudioEnabled((p) => !p);
+    if (!stream) return;
+
+    stream
+      .getAudioTracks()
+      .forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+
+    setAudioEnabled((prev) => !prev);
   };
 
   const toggleVideo = () => {
-    stream.getVideoTracks().forEach((t) => {
-      t.enabled = !t.enabled;
-    });
-    setVideoEnabled((p) => !p);
+    if (!stream) return;
+
+    stream
+      .getVideoTracks()
+      .forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+
+    setVideoEnabled((prev) => !prev);
   };
 
   const shareScreen = async () => {
-    const screenStream = await navigator.mediaDevices.getDisplayMedia({
-      video: true,
-    });
+    try {
+      const screenStream =
+        await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+        });
 
-    const screenTrack = screenStream.getVideoTracks()[0];
+      const screenTrack =
+        screenStream.getVideoTracks()[0];
 
-    peersRef.current.forEach(({ peer }) => {
-      const sender = peer._pc.getSenders().find((s) => s.track?.kind === "video");
-      if (sender) sender.replaceTrack(screenTrack);
-    });
+      peersRef.current.forEach(
+        ({ peer }) => {
+          const sender =
+            peer._pc
+              ?.getSenders()
+              ?.find(
+                (s) =>
+                  s.track?.kind === "video"
+              );
 
-    screenTrack.onended = () => window.location.reload();
+          if (sender) {
+            sender.replaceTrack(
+              screenTrack
+            );
+          }
+        }
+      );
+
+      screenTrack.onended = () => {
+        window.location.reload();
+      };
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const endMeeting = () => {
-    socket.emit("leaveRoom", { roomId });
+    socket.emit("leaveRoom", {
+      roomId,
+      userId:
+        localStorage.getItem("userId") ||
+        "demo-user",
+    });
+
     window.location.href = "/";
   };
 
-  // ================= VIDEO =================
   const Video = ({ peer }) => {
     const ref = useRef();
 
     useEffect(() => {
       peer.on("stream", (stream) => {
-        ref.current.srcObject = stream;
+        if (ref.current) {
+          ref.current.srcObject = stream;
+        }
       });
     }, [peer]);
 
@@ -205,68 +290,176 @@ function MeetingRoom() {
         playsInline
         autoPlay
         ref={ref}
-        style={{ width: "250px", margin: "5px" }}
+        style={{
+          width: "280px",
+          borderRadius: "12px",
+          background: "#000",
+        }}
       />
     );
   };
 
-  // ================= UI =================
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Meeting Room</h1>
-      <h3>Code: {roomId}</h3>
+    <div
+      style={{
+        minHeight: "100vh",
+        background:
+          "linear-gradient(to right,#eef2ff,#f8fafc)",
+        padding: "20px",
+        fontFamily: "Arial",
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          padding: "20px",
+          borderRadius: "16px",
+          marginBottom: "20px",
+          boxShadow:
+            "0 4px 12px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h1>🎥 IntellMeet</h1>
 
-      <h3>Participants: {participants.length}</h3>
+        <h3>
+          Meeting Code: {roomId}
+        </h3>
 
-      {/* VIDEO */}
-      <video
-        muted
-        ref={myVideo}
-        autoPlay
-        playsInline
-        style={{ width: "250px" }}
-      />
+        <h3>
+          Participants:
+          {" "}
+          {participants.length}
+        </h3>
+      </div>
 
-      {/* CONTROLS */}
-      <div style={{ marginTop: "10px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+        }}
+      >
         <button onClick={toggleAudio}>
-          {audioEnabled ? "Mute 🎤" : "Unmute 🔊"}
+          {audioEnabled
+            ? "Mute 🎤"
+            : "Unmute 🔊"}
         </button>
 
         <button onClick={toggleVideo}>
-          {videoEnabled ? "Stop Camera 📷" : "Start Camera 📷"}
+          {videoEnabled
+            ? "Stop Camera 📷"
+            : "Start Camera 📷"}
         </button>
 
-        <button onClick={shareScreen}>Share Screen 🖥️</button>
+        <button onClick={shareScreen}>
+          Share Screen 🖥️
+        </button>
 
-        <button onClick={endMeeting} style={{ background: "red", color: "white" }}>
+        <button
+          onClick={endMeeting}
+          style={{
+            background: "red",
+            color: "white",
+          }}
+        >
           End Meeting ❌
         </button>
       </div>
 
-      {/* PEERS */}
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {peers.map((peer, i) => (
-          <Video key={i} peer={peer} />
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "15px",
+          marginBottom: "30px",
+        }}
+      >
+        <video
+          muted
+          ref={myVideo}
+          autoPlay
+          playsInline
+          style={{
+            width: "280px",
+            borderRadius: "12px",
+            background: "#000",
+          }}
+        />
+
+        {peers.map((peer, index) => (
+          <Video
+            key={index}
+            peer={peer}
+          />
         ))}
       </div>
 
-      {/* CHAT */}
-      <hr />
+      <div
+        style={{
+          background: "#fff",
+          padding: "20px",
+          borderRadius: "16px",
+          boxShadow:
+            "0 4px 12px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h2>💬 Team Chat</h2>
 
-      <input
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type message..."
-      />
-      <button onClick={sendMessage}>Send</button>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            marginBottom: "20px",
+          }}
+        >
+          <input
+            value={message}
+            onChange={(e) =>
+              setMessage(
+                e.target.value
+              )
+            }
+            placeholder="Type message..."
+            style={{
+              flex: 1,
+              padding: "10px",
+            }}
+          />
 
-      <h3>Messages</h3>
-      {messages.map((m) => (
-        <p key={m._id}>
-          <b>{m.sender}</b>: {m.message}
-        </p>
-      ))}
+          <button
+            onClick={sendMessage}
+          >
+            Send
+          </button>
+        </div>
+
+        {messages.map((msg) => (
+          <div
+            key={
+              msg._id ||
+              Math.random()
+            }
+            style={{
+              background:
+                "#f3f4f6",
+              padding: "10px",
+              borderRadius:
+                "8px",
+              marginBottom:
+                "10px",
+            }}
+          >
+            <strong>
+              {msg.sender}
+            </strong>
+
+            <p>
+              {msg.message}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
