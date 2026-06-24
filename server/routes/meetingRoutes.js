@@ -22,7 +22,6 @@ router.post(
   authMiddleware,
   joinMeeting
 );
-module.exports = router;
 
 router.get(
   "/all",
@@ -41,3 +40,5 @@ router.post(
   authMiddleware,
   leaveMeeting
 );
+
+module.exports = router;

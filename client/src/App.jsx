@@ -1,10 +1,27 @@
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+
+import Dashboard from "./pages/Dashboard";
 import MeetingRoom from "./pages/MeetingRoom";
 
 function App() {
   return (
-    <div>
-      <MeetingRoom />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/meeting/:meetingCode"
+          element={<MeetingRoom />}
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
