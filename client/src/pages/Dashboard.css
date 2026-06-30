@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+.dash-page {
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #f1f5f9;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(99,102,241,0.16), transparent 45%),
+    radial-gradient(circle at 100% 20%, rgba(56,189,248,0.12), transparent 45%),
+    #0a0e1a;
+  padding: 32px 40px 60px;
+}
+
+/* ── HEADER ───────────────────────────────────────────────────── */
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.dash-header .logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-header .logo .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245,158,11,0.18);
+}
+
+.dash-header .welcome {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.dash-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13.5px;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.dash-logout:hover {
+  background: rgba(239, 68, 68, 0.22);
+}
+
+/* ── SECTION TITLES ───────────────────────────────────────────── */
+.dash-section-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 36px 0 16px;
+  color: #f1f5f9;
+}
+
+.dash-section-title svg { color: #38bdf8; }
+
+/* ── GLASS PANELS ─────────────────────────────────────────────── */
+.dash-panel {
+  background: rgba(17, 24, 39, 0.72);
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.dash-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.dash-panel h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 16px;
+}
+
+.dash-panel h3 svg { color: #818cf8; }
+
+.dash-input {
+  width: 100%;
+  background: #1a2333;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  color: #f1f5f9;
+  padding: 12px 14px;
+  font-size: 14.5px;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+
+.dash-input:focus { border-color: #6366f1; }
+.dash-input::placeholder { color: #5b6679; }
+
+.dash-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.dash-btn:hover { transform: translateY(-1px); }
+
+.dash-btn-primary {
+  background: linear-gradient(90deg, #6366f1, #38bdf8);
+}
+
+.dash-btn-join {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+/* ── MEETING CARDS ────────────────────────────────────────────── */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+.meeting-card {
+  background: rgba(17, 24, 39, 0.72);
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.meeting-card:hover {
+  transform: translateY(-3px);
+  border-color: #38bdf8;
+}
+
+.meeting-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.meeting-card p {
+  color: #94a3b8;
+  font-size: 13.5px;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(34, 197, 94, 0.14);
+  color: #4ade80;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.status-pill .pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+  animation: dotPulse 1.6s infinite;
+}
+
+@keyframes dotPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
+  70%  { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
+.meeting-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 12px 0 14px;
+  letter-spacing: 0.3px;
+}
+
+.meeting-join-link {
+  text-decoration: none;
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 13.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meeting-join-link:hover { text-decoration: underline; }
+
+/* ── SUMMARY CARDS ────────────────────────────────────────────── */
+.summary-card {
+  background: rgba(17, 24, 39, 0.72);
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.summary-card .summary-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.summary-card .summary-head h4 {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.summary-card .summary-date {
+  font-size: 11px;
+  color: #64748b;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+
+.summary-card .summary-text {
+  font-size: 13.5px;
+  color: #94a3b8;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.summary-action-count {
+  font-size: 12.5px;
+  color: #4ade80;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.summary-link {
+  font-size: 13px;
+  color: #818cf8;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.summary-link:hover { text-decoration: underline; }
+
+.dash-empty {
+  text-align: center;
+  color: #64748b;
+  padding: 40px;
+  font-size: 14px;
+}
+
+@media (max-width: 800px) {
+  .dash-page { padding: 24px 18px 50px; }
+  .dash-top-grid { grid-template-columns: 1fr; }
+  .dash-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+}

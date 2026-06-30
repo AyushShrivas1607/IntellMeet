@@ -6,8 +6,6 @@ const authMiddleware = (req, res, next) => {
 
     const token = req.header("Authorization");
 
-    console.log("Token:", token);
-    console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
     if (!token) {
       return res.status(401).json({
@@ -19,8 +17,6 @@ const authMiddleware = (req, res, next) => {
       token.replace("Bearer ", ""),
       process.env.JWT_SECRET
     );
-
-    console.log("Decoded:", decoded);
 
     req.user = decoded;
 

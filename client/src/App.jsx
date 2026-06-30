@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import MeetingRoom from "./pages/MeetingRoom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import MeetingSummary from "./pages/MeetingSummary";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           path="/"
           element={<Navigate to="/login" />}
         />
+     <Route path="/summary/:roomId" element={<MeetingSummary />} />
       </Routes>
     </BrowserRouter>
   );
