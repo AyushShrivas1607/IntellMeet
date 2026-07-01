@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { FaCheckCircle, FaArrowLeft, FaSpinner, FaUserCircle } from "react-icons/fa";
+import { API_BASE_URL } from "../config";
 
 function MeetingSummary() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ function MeetingSummary() {
 
     try {
       // Generate a fresh summary using whatever chat transcript exists for this room
-      const res = await axios.post("http://localhost:5000/api/summary/generate", {
+      const res = await axios.post(`${API_BASE_URL}/api/summary/generate`, {
         roomId,
         meetingTitle: passedState.meetingTitle || "Untitled Meeting",
         createdBy: localStorage.getItem("userName") || "Guest",

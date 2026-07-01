@@ -10,6 +10,7 @@ import {
   FaCheckCircle,
   FaArrowRight,
 } from "react-icons/fa";
+import { API_BASE_URL } from "../config";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -31,7 +32,7 @@ function Dashboard() {
   const loadMeetings = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/meetings/all", {
+      const res = await axios.get(`${API_BASE_URL}/api/meetings/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMeetings(res.data);
@@ -43,7 +44,7 @@ function Dashboard() {
   const loadSummaries = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/summary/history/all?createdBy=${encodeURIComponent(userName)}`
+        `${API_BASE_URL}/api/summary/history/all?createdBy=${encodeURIComponent(userName)}`
       );
       setSummaries(res.data);
     } catch (error) {
@@ -56,7 +57,7 @@ function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:5000/api/meetings/create",
+        `${API_BASE_URL}/api/meetings/create`,
         { title, description },
         { headers: { Authorization: `Bearer ${token}` } }
       );

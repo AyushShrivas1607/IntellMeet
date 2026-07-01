@@ -4,6 +4,7 @@ import Peer from "simple-peer";
 import axios from "axios";
 
 import socket from "../services/socket";
+import { API_BASE_URL } from "../config";
 
 import TopBar from "../components/TopBar";
 import VideoGrid from "../components/VideoGrid";
@@ -57,7 +58,7 @@ function MeetingRoom() {
   // ── Chat history ─────────────────────────────────────────────────
   useEffect(() => {
     if (!roomId) return;
-    axios.get(`http://localhost:5000/api/messages/${roomId}`)
+    axios.get(`${API_BASE_URL}/api/messages/${roomId}`)
       .then((res) => setMessages(res.data || []))
       .catch(console.error);
   }, [roomId]);
